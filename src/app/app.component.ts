@@ -11,10 +11,4 @@ import { Post } from './posts/post.model';
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
-export class AppComponent {
-  storedPosts:Post[]=[]
-
-  onPostAdded(post:Post) {
-    this.storedPosts.push(post);
-  }
-}
+export class AppComponent {}

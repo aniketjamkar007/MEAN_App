@@ -1,8 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { Post } from '../post.model';
-// import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { PostsService } from '../posts.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-post-list',
@@ -10,13 +11,22 @@ import { Post } from '../post.model';
   templateUrl: './post-list.component.html',
   styleUrl: './post-list.component.scss'
 })
-export class PostListComponent {
-  @Input() posts:Post[] = [];
-  // posts = [
-  //   {title: "First post", content: "This first post content"},
-  //   {title: "Second post", content: "This seconsd post content"},
-  //   {title: "Third post", content: "This third post content"},
-  // ]
+export class PostListComponent implements OnInit, OnDestroy{
+  posts:Post[] = [];
+  private postSub!: Subscription;
   
+  constructor(public postsService: PostsService) {}
+
+  ngOnInit(): void {
+    this.posts = this.postsService.getPosts();
+    this.postSub = this.postsService.getPostUpdateListener()
+      .subscribe((posts: Post[]) => {
+        this.posts = posts;
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.postSub.unsubscribe();
+  }
 
 }
