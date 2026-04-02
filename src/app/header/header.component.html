@@ -1,1 +1,12 @@
-<mat-toolbar color="primary">My App</mat-toolbar>
+<mat-toolbar color="primary">
+    <span>
+        <a routerLink="/">My App</a>
+    </span>
+    <span class="spacer"></span>
+    <ul>
+        <li>
+            <a mat-button routerLink="/create" routerLinkActive #rla="routerLinkActive"
+                [color]="rla.isActive ? 'accent' : undefined">New Post</a>
+        </li>
+    </ul>
+</mat-toolbar>
