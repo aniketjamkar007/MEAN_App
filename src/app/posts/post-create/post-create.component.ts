@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormsModule, NgForm } from '@angular/forms';
+import { FormControl, FormGroup, FormsModule, NgForm, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatInputModule } from '@angular/material/input';
@@ -8,10 +8,13 @@ import { PostsService } from '../posts.service';
 import { ActivatedRoute, ParamMap } from '@angular/router';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import { CommonModule } from '@angular/common';
+import { mimeType } from './mime-type.validator';
 
 @Component({
   selector: 'app-post-create',
-  imports: [FormsModule, MatInputModule, MatCardModule, MatButtonModule, MatProgressSpinnerModule, CommonModule],
+  imports: [FormsModule, CommonModule, ReactiveFormsModule,
+    MatInputModule, MatCardModule,
+    MatButtonModule, MatProgressSpinnerModule],
   templateUrl: './post-create.component.html',
   styleUrl: './post-create.component.scss'
 })
@@ -20,12 +23,19 @@ export class PostCreateComponent implements OnInit{
   private mode = 'create';
   private postId: any;
   rotateSpinner= false;
+  postForm!: FormGroup;
+  imagePreview: string | ArrayBuffer | null = null;
 
   constructor(public postService: PostsService,
     public activatedRoute: ActivatedRoute
   ){}
 
   ngOnInit(): void {
+    this.postForm = new FormGroup({
+      title: new FormControl(null, {validators: [Validators.required, Validators.minLength(3)]}),
+      content: new FormControl(null, {validators: [Validators.required]}),
+      image: new FormControl(null, {validators: [Validators.required], asyncValidators: [mimeType]})
+    });
     this.activatedRoute.paramMap.subscribe((paramMap: ParamMap) => {
       if(paramMap.has('id')) {
         this.mode = 'edit';
@@ -36,8 +46,14 @@ export class PostCreateComponent implements OnInit{
           this.post = {
             id: postData._id,
             title: postData.title,
-            content: postData.content
-          }
+            content: postData.content,
+            image: postData.imagePath
+          };
+          this.postForm.setValue({
+            title:this.post.title,
+            content:this.post.content,
+            image:this.post.image
+          })
         });
       } else {
         this.mode = 'create';
@@ -46,14 +62,15 @@ export class PostCreateComponent implements OnInit{
     })
   }
 
-  onSavePost(form: NgForm) {
-    if(form.invalid) {
+  onSavePost() {
+    if(this.postForm.invalid) {
       return;
     }
     this.rotateSpinner=true;
     const post:Post = {
-      title: form.value.title,
-      content: form.value.content
+      title: this.postForm.value.title,
+      content: this.postForm.value.content,
+      image: this.postForm.value.image
     }
     if(this.mode === 'create') {
       this.postService.addPost(post);
@@ -62,6 +79,21 @@ export class PostCreateComponent implements OnInit{
       this.postService.updatePost(post);
     }
     
-    form.resetForm();
+    this.postForm.reset();
+  }
+
+  onImagePicked(event: Event) {
+    const input = event.target as HTMLInputElement | null;
+    const file = input?.files?.[0];
+    if (!file) {
+      return;
+    }
+    this.postForm.patchValue({ image: file });
+    this.postForm.get('image')?.updateValueAndValidity();
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.imagePreview = reader.result;
+    };
+    reader.readAsDataURL(file);
   }
 }
