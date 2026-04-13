@@ -8,23 +8,26 @@ import { MatButtonModule } from "@angular/material/button";
 import { RouterLink } from "@angular/router";
 import { MatProgressSpinner } from "@angular/material/progress-spinner";
 import { MatPaginatorModule } from "@angular/material/paginator";
+import { AuthService } from '../../auth/auth';
 @Component({
   selector: 'app-post-list',
   imports: [MatExpansionModule, CommonModule, MatButtonModule,
-            RouterLink, MatProgressSpinner, MatPaginatorModule],
+    RouterLink, MatProgressSpinner, MatPaginatorModule,],
   templateUrl: './post-list.component.html',
   styleUrl: './post-list.component.scss'
 })
 export class PostListComponent implements OnInit, OnDestroy{
   posts:Post[] = [];
   private postSub!: Subscription;
+  private authStatusSub!: Subscription;
   isLoading= false;
+  userIsAuthenticated = false;
   totalPosts=10;
   postsPerPage=2;
   currentPage=1;
   pageSizeOptions=[1, 2, 5, 10];
   
-  constructor(public postsService: PostsService) {}
+  constructor(public postsService: PostsService, private authService: AuthService) {}
 
   ngOnInit(): void {
     this.isLoading=true;
@@ -35,10 +38,16 @@ export class PostListComponent implements OnInit, OnDestroy{
         this.posts = postData.posts;
         this.totalPosts = postData.maxPosts;
       });
+      this.userIsAuthenticated = this.authService.getIsAuth();
+    this.authStatusSub = this.authService.getAuthStatusListener().subscribe(isAuthenticated => {
+      // Handle authentication status change if needed
+      this.userIsAuthenticated = isAuthenticated;
+    });
   }
 
   ngOnDestroy(): void {
     this.postSub.unsubscribe();
+    this.authStatusSub.unsubscribe();
   }
 
   onDelete(postId: string) {

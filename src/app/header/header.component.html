@@ -4,9 +4,20 @@
     </span>
     <span class="spacer"></span>
     <ul>
-        <li>
+        <li *ngIf="userIsAuthenticated">
             <a mat-button routerLink="/create" routerLinkActive #rla="routerLinkActive"
                 [color]="rla.isActive ? 'accent' : undefined">New Post</a>
+        </li>
+        <li *ngIf="!userIsAuthenticated">
+            <a mat-button routerLink="/login" routerLinkActive #rla="routerLinkActive"
+                [color]="rla.isActive ? 'accent' : undefined">Login</a>
+        </li>
+        <li *ngIf="!userIsAuthenticated">
+            <a mat-button routerLink="/signup" routerLinkActive #rla="routerLinkActive"
+                [color]="rla.isActive ? 'accent' : undefined">Sign Up</a>
+        </li>
+        <li *ngIf="userIsAuthenticated">
+            <button mat-button (click)="onLogout()">Log out</button>
         </li>
     </ul>
 </mat-toolbar>
