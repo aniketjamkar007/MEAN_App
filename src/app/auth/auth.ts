@@ -11,6 +11,7 @@ export class AuthService {
   private isAuthenticated = false;
   private token!: string;
   private tokenTimer: any;
+  private userId!: string;
   private authStatusListener = new Subject<boolean>();
 
   constructor(private http: HttpClient, private router: Router) {}
@@ -21,6 +22,10 @@ export class AuthService {
 
   getIsAuth() {
     return this.isAuthenticated;
+  }
+  
+  getUserId() {
+    return this.userId;
   }
 
   getAuthStatusListener() {
@@ -48,6 +53,7 @@ export class AuthService {
         if (token) {
           const expiresInDuration = response.expiresIn;
           this.setAuthTimer(expiresInDuration);
+          this.userId = response.userId;
           this.authStatusListener.next(true);
           this.isAuthenticated = true;
           this.saveAuthData(token, new Date(new Date().getTime() + expiresInDuration * 1000), response.userId);
@@ -66,6 +72,7 @@ export class AuthService {
     clearTimeout(this.tokenTimer);
     this.token = '';
     this.isAuthenticated = false;
+    this.userId = '';
     this.authStatusListener.next(false);
     this.clearAuthData();
     this.router.navigate(['/']);
@@ -81,6 +88,7 @@ export class AuthService {
     if (expiresIn > 0) {
       this.token = authInformation.token;
       this.isAuthenticated = true;
+      this.userId = authInformation.userId;
       this.setAuthTimer(expiresIn / 1000);
       this.authStatusListener.next(true);
     }

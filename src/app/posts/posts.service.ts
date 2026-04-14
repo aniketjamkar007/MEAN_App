@@ -19,17 +19,19 @@ export class PostsService {
       .get<{message: string, posts: any, maxPosts: number}>('http://localhost:3000/api/posts'+queryParams)
       .pipe(
         map((res) => {
-          return { posts: res.posts.map((post: { title: any; content: any; _id: any; imagePath: any }) => {
+          return { posts: res.posts.map((post: { title: any; content: any; _id: any; imagePath: any, creator: any }) => {
             return {
               title: post.title,
               content: post.content,
               id: post._id,
-              image: post.imagePath
+              image: post.imagePath,
+              creator: post.creator
             }
           }), maxPosts: res.maxPosts };
         })
       )
       .subscribe((transformedPostsData) =>{
+        console.log(transformedPostsData);
         this.posts=transformedPostsData.posts;
         this.postsUpdated.next({
           posts: [...this.posts],
