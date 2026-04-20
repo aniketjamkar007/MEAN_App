@@ -6,13 +6,15 @@ const userRoutes = require('./routes/user')
 const mongoose = require('mongoose');
 
 const app = express();
-mongoose.connect('mongodb+srv://Aj:<email me>@cluster0.4c9ks.mongodb.net/MEAN_Project ')
+mongoose.connect('mongodb+srv://Aj:' + 
+  process.env.MONGO_ATLAS_PW + 
+  '@cluster0.4c9ks.mongodb.net/MEAN_Project ')
     .then(() => {
         console.log('Connected to database');
     })
-    .catch(() => {
-        console.log('Connection failed');
-    })
+    .catch(err => {
+        console.log('Connection failed:', err);
+    });
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
@@ -31,7 +33,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(postRoutes);
+app.use('/api/posts', postRoutes);
 app.use('/api/user', userRoutes);
 
 module.exports = app;

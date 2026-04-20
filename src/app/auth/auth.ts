@@ -1,13 +1,21 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthData } from './auth-data.model';
 import { Subject } from 'rxjs';
+import { Config } from '../../services/config';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
+  
+  private configService = inject(Config);
+
+  private get BACKEND_URL(): string {
+    return this.configService.apiUrl+'/user/';
+  }
+  
   private isAuthenticated = false;
   private token!: string;
   private tokenTimer: any;
@@ -34,7 +42,7 @@ export class AuthService {
 
   createUser(email: string, password: string) {
     const authData: AuthData = { email: email, password: password };
-    this.http.post('http://localhost:3000/api/user/signup', authData).subscribe(
+    this.http.post(this.BACKEND_URL+'signup', authData).subscribe(
       response => {
         this.router.navigate(['/']);
         console.log('User created successfully:', response);
@@ -48,7 +56,7 @@ export class AuthService {
 
   login(email: string, password: string) {
     const authData: AuthData = { email: email, password: password };
-    this.http.post<{ token: string, expiresIn: number, userId: string }>('http://localhost:3000/api/user/login', authData).subscribe(
+    this.http.post<{ token: string, expiresIn: number, userId: string }>(this.BACKEND_URL+'login', authData).subscribe(
       response => {
         const token = response.token;
         this.token = token;
