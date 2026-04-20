@@ -36,9 +36,11 @@ export class AuthService {
     const authData: AuthData = { email: email, password: password };
     this.http.post('http://localhost:3000/api/user/signup', authData).subscribe(
       response => {
+        this.router.navigate(['/']);
         console.log('User created successfully:', response);
       },
       error => {
+        this.authStatusListener.next(false);
         console.error('Error creating user:', error);
       }
     );

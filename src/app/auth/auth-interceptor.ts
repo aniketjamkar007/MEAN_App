@@ -6,7 +6,7 @@ import { AuthService } from './auth';
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
 
-    constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService) {}
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const authToken = this.authService.getToken();
     if (authToken) {
@@ -15,6 +15,6 @@ export class AuthInterceptor implements HttpInterceptor {
       });
       return next.handle(authReq);
     }
-	return next.handle(req);
+	  return next.handle(req);
   }
 }
